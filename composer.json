@@ -1,0 +1,6 @@
+{
+    "name": "vendor/name",
+    "require": {
+        "google/apiclient": "^2.0"
+    }
+}
