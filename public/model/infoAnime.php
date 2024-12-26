@@ -35,8 +35,10 @@ class InfoAnime
     public function getNombresTemporadas()
     {
         $nombres = "";
-        foreach ($this->temporadas as $temporada) {
-            $nombres .= $temporada->nombre . "\n";
+        if(sizeof($this->temporadas) > 1){
+            foreach ($this->temporadas as $temporada) {
+                $nombres .= $temporada->nombre . "\n";
+            }
         }
         return $nombres;
     }
