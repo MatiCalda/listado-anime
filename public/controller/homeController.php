@@ -6,12 +6,6 @@ include_once '../model/infoAnime.php';
 include_once '../model/temporadaAnime.php';
 session_start();
 
-// TODO: Eliminar - solo uso en local
-$user = new User();
-$user->nombre = "matias";
-$_SESSION['user'] = serialize($user);
-// TODO: fin Eliminar - solo uso en local
-
 $location = '../notLogged.php';
 
 if (isset($_GET['code'])) {
@@ -109,7 +103,7 @@ if (isset($_SESSION['user'])) {
             when 'O' then 'OVA'
             end as tipo,
         t.nombre as temporada, t.cant_capitulos, t.duracion_capitulo from anime a inner join temporadas t on a.id = t.id_anime
-         order by a.nombre;";
+         order by a.nombre, t.id;";
     $stmt = $conn->prepare($sqlObtenerSeries);
     $stmt->execute();
     $nombreAnime = null;
