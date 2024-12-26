@@ -1,5 +1,6 @@
 <?php
 include_once 'user.php';
+include_once 'temporadaAnime.php';
 
 
 class InfoAnime
@@ -16,11 +17,32 @@ class InfoAnime
     {
         $this->nombre = $nombre;
         $this->tipo = $tipo;
-        $this->temporadas = $temporadas;
+        $this->temporadas = [];
         $this->cantidadCapitulos = $cantidadCapitulos;
         $this->duracionCapitulo = $duracionCapitulo;
         $this->totalMinutos = $totalMinutos;
         $this->totalHoras = $totalHoras;
+    }
+    public function addTemporada($temporada)
+    {
+        $this->temporadas[] = $temporada;
+
+        $this->cantidadCapitulos += $temporada->cantidadCapitulos;
+        $this->duracionCapitulo = $temporada->duracionCapitulo;
+
+        $this->totalMinutos = $this->cantidadCapitulos * $this->duracionCapitulo;
+    }
+    public function getNombresTemporadas()
+    {
+        $nombres = "";
+        foreach ($this->temporadas as $temporada) {
+            $nombres .= $temporada->nombre . "\n";
+        }
+        return $nombres;
+    }
+    public function getTotalHoras()
+    {
+        return sprintf("%02d",intdiv($this->totalMinutos, 60)) . ':' . sprintf("%02d", ($this->totalMinutos % 60));
     }
     public function renderInput()
     {
@@ -33,9 +55,9 @@ class InfoAnime
                 <div class="col-3 col-sm-6 col-md-4 col-lg-1">
                     <select class="form-select" aria-label="Default select example" class="w-100" name="tipo">
                         <option disabled >tipo...</option>
-                        <option selected value="Serie">Serie</option>
-                        <option value="Pelicula">Pelicula</option>
-                        <option value="OVA">OVA</option>
+                        <option selected value="S">Serie</option>
+                        <option value="P">Pelicula</option>
+                        <option value="O">OVA</option>
                     </select>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
@@ -45,7 +67,7 @@ class InfoAnime
                     <input type="number" aria-label="Last name" placeholder="capitulos" class="form-control" name="cant_capitulos">
                 </div>
                 <div class="col-4 col-sm-6 col-md-4 col-lg-1">
-                    <input type="number" aria-label="Last name" placeholder="duracion" class="form-control" name="duracion_capitulo">
+                    <input type="number" aria-label="Last name" placeholder="duracion" class="form-control" name="duracion_capitulo" value=20>
                 </div>
                 <div class="col-4 col-sm-6 col-md-4 col-lg-1">
                     <button type="submit" class="btn btn-success w-100" name="guardar">Guardar</button>
@@ -56,21 +78,24 @@ class InfoAnime
 
         echo $html;
     }
-
     public function renderItem()
     {
         $html = "
         <tr>
           <td class=\"align-middle text-nowrap\">" . $this->nombre . "</td>
           <td class=\"align-middle\">" . $this->tipo . "</td>
-          <td class=\"align-middle text-nowrap\">" . nl2br($this->temporadas) . "</td>
+          <td class=\"align-middle text-nowrap\">" . //nl2br($this->temporadas) 
+            nl2br($this->getNombresTemporadas())
+            . "</td>
           <td class=\"align-middle\">" . $this->cantidadCapitulos . "</td>
           <td class=\"align-middle\">" . $this->duracionCapitulo . "</td>
           <td class=\"align-middle\">" . $this->totalMinutos . "</td>
-          <td class=\"align-middle\">" . $this->totalHoras . "</td>
+          <td class=\"align-middle\">" . $this->getTotalHoras() . "</td>
         </tr>"
         ;
         echo $html;
     }
+
+
 
 }

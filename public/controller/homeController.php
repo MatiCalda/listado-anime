@@ -3,6 +3,7 @@ require_once '../../vendor/autoload.php';
 require_once '../config.php';
 include_once '../model/user.php';
 include_once '../model/infoAnime.php';
+include_once '../model/temporadaAnime.php';
 session_start();
 
 // TODO: Eliminar - solo uso en local
@@ -11,16 +12,18 @@ $user->nombre = "matias";
 $_SESSION['user'] = serialize($user);
 // TODO: fin Eliminar - solo uso en local
 
+$location = '../notLogged.php';
+
 if (isset($_GET['code'])) {
     $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
     $client->setAccessToken($token['access_token']);
-    
+
     // get profile info
     $google_oauth = new Google_Service_Oauth2($client);
     $google_account_info = $google_oauth->userinfo->get();
-    $correo =  $google_account_info->email;
-    $nombre =  $google_account_info->name;
-    $picture = $google_account_info->picture; 
+    $correo = $google_account_info->email;
+    $nombre = $google_account_info->name;
+    $picture = $google_account_info->picture;
 
     // Estos datos son los que obtenemos....	
 
@@ -72,83 +75,94 @@ if (isset($_POST['guardar'])) {
     ]);
 
     if ($row = $stmt->fetch()) {
-        $sqlAgregarTemporada = "INSERT into temporadas (nombre, cant_capitulos, duracion_capitulo, id_anime)
-        values (:nombre, :cant_capitulos, :duracion_capitulo, :id_anime)";
-        $stmt = $conn->prepare($sqlAgregarTemporada);
-        $stmt->execute([
-            'nombre' => $_POST['temporada'],
-            'cant_capitulos'=> $_POST['cant_capitulos'],
-            'duracion_capitulo'=> $_POST['duracion_capitulo'], 
-            'id_anime'=> $row['id'], 
-        ]);
-    }else{
-        $sqlAgregarAnime = "INSERT into anime (nombre) values (:nombre)";
+        $idAnime = $row['id'];
+        $nombreTemporada = $_POST['temporada'];
+    } else {
+        $sqlAgregarAnime = "INSERT into anime (nombre, tipo) values (:nombre, :tipo)";
         $stmt = $conn->prepare($sqlAgregarAnime);
         $stmt->execute([
-            'nombre' => $_POST['nombre']
+            'nombre' => $_POST['nombre'],
+            'tipo' => $_POST['tipo']
         ]);
         $idAnime = $conn->lastInsertId();
-
-        $sqlAgregarTemporada = "INSERT into temporadas (nombre, cant_capitulos, duracion_capitulo, id_anime)
-        values (:nombre, :cant_capitulos, :duracion_capitulo, :id_anime)";
-        $stmt = $conn->prepare($sqlAgregarTemporada);
-        $stmt->execute([
-            'nombre' => $_POST['nombre'],
-            'cant_capitulos'=> $_POST['cant_capitulos'],
-            'duracion_capitulo'=> $_POST['duracion_capitulo'], 
-            'id_anime'=> $idAnime, 
-        ]);
+        $nombreTemporada = $_POST['nombre'];
     }
 
-    header('location: homeController.php');
+    $sqlAgregarTemporada = "INSERT into temporadas (nombre, cant_capitulos, duracion_capitulo, id_anime)
+        values (:nombre, :cant_capitulos, :duracion_capitulo, :id_anime)";
+    $stmt = $conn->prepare($sqlAgregarTemporada);
+    $stmt->execute([
+        'nombre' => $nombreTemporada,
+        'cant_capitulos' => $_POST['cant_capitulos'],
+        'duracion_capitulo' => $_POST['duracion_capitulo'],
+        'id_anime' => $idAnime,
+    ]);
+
+    $location = 'homeController.php';
 }
 //TODO: modificar la clase infoAnime para que mapee cada anime y agrege objetos temporada a cada uno
 if (isset($_SESSION['user'])) {
-    $sql = "SELECT nombre, tipo, temporadas, cantidad_capitulos, duracion_capitulo, total_minutos, TIME_FORMAT(total_horas, \"%H:%i\") AS total_horas FROM lista ORDER BY nombre ASC";
-
-    $stmt = $conn->prepare($sql);
-    // Especificamos el fetch mode antes de llamar a fetch()
-    $stmt->setFetchMode(PDO::FETCH_ASSOC);
-    // Ejecutamos
+    $sqlObtenerSeries = "select a.nombre, 
+        case a.tipo 
+            when 'S' then 'Serie'
+            when 'P' then 'Pelicula'
+            when 'O' then 'OVA'
+            end as tipo,
+        t.nombre as temporada, t.cant_capitulos, t.duracion_capitulo from anime a inner join temporadas t on a.id = t.id_anime
+         order by a.nombre;";
+    $stmt = $conn->prepare($sqlObtenerSeries);
     $stmt->execute();
-    $arrInfoAnime = [];
-
-    while ($row = $stmt->fetch()) { // el usuario existe
-        $infoAnime = new InfoAnime($row['nombre'], $row['tipo'], $row['temporadas'], $row['cantidad_capitulos'], $row['duracion_capitulo'], $row['total_minutos'], $row['total_horas']);
-        $arrInfoAnime[] = $infoAnime;
+    $nombreAnime = null;
+    $arrAnimes = [];
+    while ($row = $stmt->fetch()) {
+        if ($nombreAnime != $row['nombre']) {
+            $nombreAnime = $row['nombre'];
+            $anime = new InfoAnime($nombreAnime, $row['tipo']);
+            $arrAnimes[] = $anime;
+        }
+        $temporada = new TemporadaAnime($row['temporada'], $row['cant_capitulos'], $row['duracion_capitulo']);
+        $anime->addTemporada($temporada);
     }
-    $_SESSION['listaAnimes'] = serialize($arrInfoAnime);
-
-    $sql = "SELECT
-	(select count(nombre) from lista where tipo = 'Serie') as series,
-	(select count(nombre) from lista where tipo = 'Pelicula') as peliculas,
-	(select count(nombre) from lista where tipo = 'OVA') as ovas,
-    count(nombre) as cantidad_total,
-    SUM(cantidad_capitulos) as capitulos,
-    TIME_FORMAT( (SEC_TO_TIME(SUM(TIME_TO_SEC(total_horas)))) , \"%H:%i\") as total_horas, 
-	CONCAT(FLOOR(SUM(TIME_TO_SEC(total_horas)) / 86400), ' días, ', 
-	MOD(FLOOR(SUM(TIME_TO_SEC(total_horas)) / 3600), 24), ' horas') AS total_tiempo
-    from lista;";
-
-    $stmt = $conn->prepare($sql);
-    // Especificamos el fetch mode antes de llamar a fetch()
-    $stmt->setFetchMode(PDO::FETCH_ASSOC);
-    // Ejecutamos
-    $stmt->execute();
+    $_SESSION['listaAnimes'] = serialize($arrAnimes);
     
-    if ($row = $stmt->fetch()) {
+    $sqlObtenerStats = "select
+    (select count(nombre) from anime where tipo = 'S') as series,
+        (select count(nombre) from anime where tipo = 'P') as peliculas,
+        (select count(nombre) from anime where tipo = 'O') as ovas,
+        count(distinct a.nombre) as cantidad_total,
+        sum(t.cant_capitulos) as capitulos
+        from anime a inner join temporadas t on a.id = t.id_anime;";
+    $stmt = $conn->prepare($sqlObtenerStats);
+    $stmt->execute();
+    if($row = $stmt->fetch()){
         $arrStats = [
             'series' => $row['series'], 
             'peliculas' => $row['peliculas'], 
             'ovas' => $row['ovas'], 
             'capitulos' => $row['capitulos'],
-            'cantidad_total' => $row['cantidad_total'], 
-            'total_horas' => $row['total_horas'], 
-            'total_tiempo' => $row['total_tiempo']
+            'cantidad_total' => $row['cantidad_total']
         ];
     }
+    $minutos = null;
+    foreach($arrAnimes as $serie){
+        $minutos += $serie->totalMinutos;
+    }
+    $arrStats['total_horas'] = intdiv($minutos, 60).':'. sprintf("%02d",($minutos % 60));
+    $arrStats['total_tiempo'] = convertirHorasADiasYHoras($arrStats['total_horas']);
 
 
     $_SESSION['statsAnime'] = serialize($arrStats);
-    header('location: ../home.php');
+
+    $location = '../home.php';
 }
+
+function convertirHorasADiasYHoras($horas) {
+    // Calcular los días
+    $dias = floor($horas / 24);
+    // Calcular las horas restantes
+    $horasRestantes = $horas % 24;
+    // Retornar el resultado como una cadena de texto
+    return $dias . " días, " . $horasRestantes . " horas";
+}
+
+header('location:' . $location);

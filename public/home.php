@@ -109,7 +109,6 @@ try {
           $arrInfoAnime[$i]->renderItem();
         }
 
-
         ?>
 
 
