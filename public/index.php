@@ -3,7 +3,7 @@
 require_once '../vendor/autoload.php';
 require_once 'config.php';
 session_start();
-if(isset($_GET['logout'])) {
+if (isset($_GET['logout'])) {
     // clear the session variable, display logged out message
     // remove all session variables
     session_unset();
@@ -26,15 +26,18 @@ if (isset($_SESSION['user'])) {
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-        <link rel="icon" href="img/icon/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="img/icon/favicon.ico" type="image/x-icon">
     <title>AnimeList</title>
 </head>
 
 <body>
     <div class="d-grid gap-2 col-6 mx-auto pt-5">
-        <a  href="<?= $client->createAuthUrl() ?>" class="btn btn-success" type="button">LogIn</a>
+        <!-- <a  href="<?= $client->createAuthUrl() ?>" class="btn btn-success" type="button">LogIn</a> -->
+        <a href="controller/homeController.php" class="btn btn-success" type="button">LogIn</a>
     </div>
 
+
+    
     <!-- Optional JavaScript; choose one of the two! -->
 
     <!-- Option 1: Bootstrap Bundle with Popper -->

@@ -5,6 +5,7 @@ include_once 'temporadaAnime.php';
 
 class InfoAnime
 {
+    public $id;
     public $nombre;
     public $tipo;
     public $temporadas;
@@ -13,8 +14,9 @@ class InfoAnime
     public $totalMinutos;
     public $totalHoras;
 
-    public function __construct($nombre = null, $tipo = null, $temporadas = null, $cantidadCapitulos = null, $duracionCapitulo = null, $totalMinutos = null, $totalHoras = null)
+    public function __construct($id = null ,$nombre = null, $tipo = null, $temporadas = null, $cantidadCapitulos = null, $duracionCapitulo = null, $totalMinutos = null, $totalHoras = null)
     {
+        $this->id = $id;
         $this->nombre = $nombre;
         $this->tipo = $tipo;
         $this->temporadas = [];
@@ -83,7 +85,7 @@ class InfoAnime
     public function renderItem()
     {
         $html = "
-        <tr>
+        <tr role=\"button\" class=\"trigger-modal\"  data-bs-id=". $this->id ." data-bs-nombreAnime=\"". $this->nombre ."\">
           <td class=\"align-middle text-nowrap\">" . $this->nombre . "</td>
           <td class=\"align-middle\">" . $this->tipo . "</td>
           <td class=\"align-middle text-nowrap\">" . //nl2br($this->temporadas) 

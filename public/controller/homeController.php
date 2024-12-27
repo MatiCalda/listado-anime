@@ -5,6 +5,10 @@ include_once '../model/user.php';
 include_once '../model/infoAnime.php';
 include_once '../model/temporadaAnime.php';
 session_start();
+//TODO conexion local (eliminar)
+$user = new User('Matias', 'matias.caldarone@gmail.com');
+$_SESSION['user'] = serialize($user);
+//TODO: fin conexion local
 
 $location = '../notLogged.php';
 
@@ -96,7 +100,7 @@ if (isset($_POST['guardar'])) {
 }
 //TODO: modificar la clase infoAnime para que mapee cada anime y agrege objetos temporada a cada uno
 if (isset($_SESSION['user'])) {
-    $sqlObtenerSeries = "select a.nombre, 
+    $sqlObtenerSeries = "select a.id as id_anime,a.nombre, 
         case a.tipo 
             when 'S' then 'Serie'
             when 'P' then 'Pelicula'
@@ -111,7 +115,7 @@ if (isset($_SESSION['user'])) {
     while ($row = $stmt->fetch()) {
         if ($nombreAnime != $row['nombre']) {
             $nombreAnime = $row['nombre'];
-            $anime = new InfoAnime($nombreAnime, $row['tipo']);
+            $anime = new InfoAnime($row['id_anime'], $nombreAnime, $row['tipo']);
             $arrAnimes[] = $anime;
         }
         $temporada = new TemporadaAnime($row['temporada'], $row['cant_capitulos'], $row['duracion_capitulo']);
