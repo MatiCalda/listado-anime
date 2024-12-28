@@ -135,30 +135,10 @@ try {
         </div>
         <div class="modal-body container" id="selected-anime">
 
-          <div class="row">
-            <div class="col-12 col-sm-7 col-md-5 col-lg-6">
-              <label for="nombreTemporada">Nombre</label>
-              <input type="text" class="form-control" id="inputa" value="test">
-            </div>
-            <div class="col-4 col-sm-6 col-md-3 col-lg-2">
-              <label for="">Capitulos</label>
-              <input type="number" class="form-control" value=10>
-            </div>
-            <div class="col-4 col-sm-6 col-md-3 col-lg-2">
-              <label for="">Duración</label>
-              <input type="number" class="form-control">
-            </div>
-            <div class="col d-inline-flex align-items-end justify-content-around">
-              <button type="button" class="btn btn-light"><i class="bi bi-pencil-square"></i></i></button>
-              <button type="button" class="btn btn-danger"><i class="bi bi-trash"></i></button>
-            </div>
-            <div class="dropdown-divider"></div>
-          </div>
-
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-success">Guardar</button>
+          <button type="button" class="btn btn-success" id="btnGuardar">Guardar</button>
         </div>
       </div>
     </div>
@@ -183,7 +163,7 @@ try {
         getAnime(idAnime).then(data => {
           data.temporadas.forEach(temp => {
             modal.innerHTML += `
-                    <div class="row">
+                    <div class="row" data-bs-id="${temp['id']}">
                         <div class="col-12 col-sm-7 col-md-5 col-lg-6">
                             <label for="nombreTemporada">Nombre</label>
                             <input type="text" class="form-control" value="${temp['nombre']}" disabled>
@@ -237,8 +217,12 @@ try {
                 input.className = (input.className == "form-control") ? "form-control text-decoration-line-through" : "form-control"
                 if (input.className == "form-control") {
                   btnEdit.classList.remove('visually-hidden')
+                  iconDelete.classList.add('bi-trash')
+                  iconDelete.classList.remove('bi-x-circle')
                 } else {
                   btnEdit.classList.add('visually-hidden')
+                  iconDelete.classList.remove('bi-trash')
+                  iconDelete.classList.add('bi-x-circle')
                 }
               })
 

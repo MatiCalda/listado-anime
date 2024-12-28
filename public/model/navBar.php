@@ -17,7 +17,7 @@ class NavBar{
         $html = '
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
-              <a class="navbar-brand" href="#">AnimeList</a>
+              <a class="navbar-brand" href="controller/homeController.php">AnimeList</a>
                 <div class="d-flex flex-row-reverse nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: rgba(255,255,255,.55);">
                         <label for="" class="text-light">'.$this->user->nombre.'</label>
