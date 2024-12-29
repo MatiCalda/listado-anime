@@ -124,8 +124,7 @@ try {
   </div>
 
 
-  <!-- MODAL -->
-
+  <!-- MODAL EDITOR -->
   <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
@@ -143,7 +142,64 @@ try {
       </div>
     </div>
   </div>
+  <!-- MODAL MESSAGE -->
+  <div class="modal fade" id="modalMessage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Informacion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="msgResponse">
+        </div>
+        <div class="modal-footer">
+          <a href="javascript:void(0);" class="btn btn-success" id="btnReload">Aceptar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const btnGuardar = document.getElementById("btnGuardar")
+    btnGuardar.addEventListener('click', () => {
+      const objAction = {
+        modificar: [],
+        eliminar: []
+      }
+      modal.querySelectorAll('.row').forEach(row => {
+        action = parseInt(row.querySelector('input[type=hidden]').value);
+        id = row.getAttribute('data-bs-id')
+        temp = {}
 
+        switch (action) {
+          case 1:
+            temp['id'] = id
+            temp['nombre'] = row.querySelector('.name').value
+            temp['cantidadCapitulos'] = row.querySelector('.cantcap').value
+            temp['duracionCapitulo'] = row.querySelector('.durcap').value
+            objAction.modificar.push(temp)
+            break;
+          case 2:
+            objAction.eliminar.push(id)
+            break;
+
+          default:
+            break;
+        }
+
+      })
+      postAnime(objAction).then(data => {
+        document.getElementById('msgResponse').innerText = data.message
+        if (data.status == 'success') {
+          document.getElementById('btnReload').setAttribute('href', 'controller/homeController.php')
+        }
+        let modalMsg = new bootstrap.Modal(document.getElementById('modalMessage'));
+        myModal.hide();
+        modalMsg.show();
+        console.log(data.message);
+      });
+
+    })
+  </script>
   <!-- Optional JavaScript; choose one of the two! -->
 
   <!-- Option 1: Bootstrap Bundle with Popper -->
@@ -157,6 +213,7 @@ try {
         var nombreAnime = anime.getAttribute('data-bs-nombreAnime')
         var idAnime = anime.getAttribute('data-bs-id')
         document.getElementById('modal').setAttribute('data-bs-nombreAnime', nombreAnime)
+        document.getElementById('modal').setAttribute('data-bs-idAnime', idAnime)
         modal = document.getElementById('selected-anime')
         modal.innerHTML = "";
 
@@ -164,73 +221,28 @@ try {
           data.temporadas.forEach(temp => {
             modal.innerHTML += `
                     <div class="row" data-bs-id="${temp['id']}">
-                        <div class="col-12 col-sm-7 col-md-5 col-lg-6">
+                        <input type="hidden" value=0>
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-6">
                             <label for="nombreTemporada">Nombre</label>
-                            <input type="text" class="form-control" value="${temp['nombre']}" disabled>
+                            <input type="text" class="form-control name" value="${temp['nombre']}" disabled>
                         </div>
-                        <div class="col-4 col-sm-6 col-md-3 col-lg-2">
+                        <div class="col-4 col-sm-4 col-md-4 col-lg-2">
                             <label for="">Capitulos</label>
-                            <input type="number" class="form-control" value=${temp['cantidadCapitulos']} disabled>
+                            <input type="number" class="form-control cantcap" value=${temp['cantidadCapitulos']} disabled>
                         </div>
-                        <div class="col-4 col-sm-6 col-md-3 col-lg-2">
+                        <div class="col-3 col-sm-3 col-md-3 col-lg-2">
                             <label for="">Duración</label>
-                            <input type="number" class="form-control" value=${temp['duracionCapitulo']} disabled>
+                            <input type="number" class="form-control durcap" value=${temp['duracionCapitulo']} disabled>
                         </div>
                         <div class="col d-inline-flex align-items-end justify-content-around">
                             <button type="button" class="btn btn-light btn-edit"><i class="i-edit bi bi-pencil-square"></i></i></button>
                             <button type="button" class="btn btn-danger btn-delete"><i class="i-delete bi bi-trash"></i></button>
+                            <button type="button" class="btn btn-info btn-reload"><i class="i-reload bi bi-arrow-counterclockwise"></i></button>
                         </div>
                         <div class="dropdown-divider"></div>
                     </div>
                     `
           });
-
-
-
-          document.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', () => {
-              item = btn.parentElement.parentElement;
-              iconEdit = item.querySelector('.i-edit')
-              item.querySelectorAll('input').forEach(input => {
-                input.disabled = !input.disabled;
-                if (!input.disabled) {
-                  iconEdit.classList.remove('bi-pencil-square')
-                  iconEdit.classList.add('bi-x-circle')
-                } else {
-                  iconEdit.classList.remove('bi-x-circle')
-                  iconEdit.classList.add('bi-pencil-square')
-                }
-              });
-            })
-          })
-          document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', () => {
-              item = btn.parentElement.parentElement;
-              iconDelete = item.querySelector('.i-delete')
-              item.querySelectorAll('input').forEach(input => {
-                input.disabled = true
-                iconEdit = item.querySelector('.i-edit')
-                iconEdit.classList.remove('bi-x-circle')
-                iconEdit.classList.add('bi-pencil-square')
-
-                btnEdit = item.querySelector('.btn-edit')
-                input.className = (input.className == "form-control") ? "form-control text-decoration-line-through" : "form-control"
-                if (input.className == "form-control") {
-                  btnEdit.classList.remove('visually-hidden')
-                  iconDelete.classList.add('bi-trash')
-                  iconDelete.classList.remove('bi-x-circle')
-                } else {
-                  btnEdit.classList.add('visually-hidden')
-                  iconDelete.classList.remove('bi-trash')
-                  iconDelete.classList.add('bi-x-circle')
-                }
-              })
-
-            })
-          })
-
-
-
           myModal.show()
         })
       })
@@ -241,12 +253,14 @@ try {
 
     var exampleModal = document.getElementById('modal')
     exampleModal.addEventListener('show.bs.modal', function (event) {
-      // Button that triggered the modal
-      var button = event.relatedTarget
 
+
+      // Button that triggered the modal
       // Extract info from data-bs-* attributes
       var modal = this
       var nombreAnime = modal.getAttribute('data-bs-nombreAnime')
+      var idAnime = modal.getAttribute('data-bs-idAnime')
+
 
       // If necessary, you could initiate an AJAX request here
       // and then do the updating in a callback.
@@ -256,9 +270,87 @@ try {
 
       //modalTitle.textContent = 'Temporadas ' + nombreAnime
       modalTitle.innerHTML = '<b>Temporadas </b>' + nombreAnime
+      tempsOriginal = {
+        'idAnime': idAnime,
+        'temporadas': []
+      };
+      modal.querySelectorAll('.row').forEach(input => {
+        tempsOriginal.temporadas.push({
+          id: input.getAttribute('data-bs-id'),
+          nombre: input.querySelector('.name').value,
+          cantidadCapitulos: input.querySelector('.cantcap').value,
+          duracionCapitulo: input.querySelector('.durcap').value,
+        });
+        input.addEventListener('change', () => {
+          input.querySelectorAll('input').forEach(field => {
+            field.classList.add('bg-warning')
+
+          })
+        })
+      });
+
+      document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', () => {
+          item = btn.parentElement.parentElement;
+          iconEdit = item.querySelector('.i-edit')
+          item.querySelector('input[type=hidden]').value = 1
+          item.querySelectorAll('input').forEach(input => {
+            input.disabled = !input.disabled;
+            if (!input.disabled) {
+              iconEdit.classList.remove('bi-pencil-square')
+              iconEdit.classList.add('bi-check-circle')
+            } else {
+              iconEdit.classList.remove('bi-check-circle')
+              iconEdit.classList.add('bi-pencil-square')
+            }
+          });
+        })
+      })
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+          item = btn.parentElement.parentElement;
+          item.querySelector('input[type=hidden]').value = 2
+          const temp = tempsOriginal.temporadas.find(temporada => temporada.id === item.getAttribute('data-bs-id'));
+          item.querySelector('.name').value = temp.nombre
+          item.querySelector('.cantcap').value = temp.cantidadCapitulos
+          item.querySelector('.durcap').value = temp.duracionCapitulo
+
+          iconDelete = item.querySelector('.i-delete')
+          item.querySelectorAll('input').forEach(input => {
+            input.disabled = true
+            iconEdit = item.querySelector('.i-edit')
+            iconEdit.classList.remove('bi-check-circle')
+            iconEdit.classList.add('bi-pencil-square')
+            btnEdit = item.querySelector('.btn-edit')
+            btnEdit.classList.add('visually-hidden')
+            input.classList.add("text-decoration-line-through")
+            input.classList.remove("bg-warning")
+          })
+
+        })
+      })
+      document.querySelectorAll('.btn-reload').forEach(btn => {
+        btn.addEventListener('click', () => {
+          item = btn.parentElement.parentElement;
+          item.querySelector('input[type=hidden]').value = 0
+          const temp = tempsOriginal.temporadas.find(temporada => temporada.id === item.getAttribute('data-bs-id'));
+          item.querySelector('.name').value = temp.nombre
+          item.querySelector('.cantcap').value = temp.cantidadCapitulos
+          item.querySelector('.durcap').value = temp.duracionCapitulo
+
+          iconEdit = item.querySelector('.i-edit')
+          iconEdit.classList.remove('bi-check-circle')
+          iconEdit.classList.add('bi-pencil-square')
+          btnEdit = item.querySelector('.btn-edit')
+          btnEdit.classList.remove('visually-hidden')
+          item.querySelectorAll('input').forEach(input => {
+            input.disabled = true
+            input.classList.remove("text-decoration-line-through")
+            input.classList.remove("bg-warning")
+          })
+        })
+      })
     })
-
-
     async function getAnime(idAnime) {
       let resupuesta;
 
@@ -271,9 +363,23 @@ try {
       resupuesta = data;
       return resupuesta;
     }
+    async function postAnime(animeData) {
+      const response = await fetch('controller/infoAnimeController.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(animeData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Error en la solicitud: ' + response.status);
+      }
+
+      const data = await response.json();
+      return data;
+    }
   </script>
-
-
   <!-- Option 2: Separate Popper and Bootstrap JS -->
   <!--
       <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>

@@ -44,7 +44,36 @@ try {
             }
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = json_decode(file_get_contents('php://input'), true);
+            try {
+                $data = json_decode(file_get_contents('php://input'), true);
+                foreach ($data['modificar'] as $temporada) {
+                    $sqlUpdate = "update temporadas
+                set nombre = :nombre, cant_capitulos = :cant_capitulos, duracion_capitulo = :duracion_capitulo
+                where id = :id";
+                    $stmt = $conn->prepare($sqlUpdate);
+                    $stmt->execute([
+                        "id" => $temporada['id'],
+                        "nombre" => $temporada['nombre'],
+                        "cant_capitulos" => $temporada['cantidadCapitulos'],
+                        "duracion_capitulo" => $temporada['duracionCapitulo']
+                    ]);
+                }
+                $idsEliminar = implode(', ', $data['eliminar']);
+                $sqlDelete = "DELETE from temporadas where id in (:ids)";
+                $stmt = $conn->prepare($sqlDelete);
+                $stmt->execute([
+                    "ids" => $idsEliminar
+                ]);
+                $response = [
+                    'status' => 'success',
+                    'message' => 'Modificaciones realizadas correctamente'
+                ];
+            }catch(PDOException $e) {
+                $response = [
+                    'status' => 'error',
+                    'message' => 'Ha ocurrido un error, intente nuevamente'
+                ];
+            }
         }
 
     } else {
