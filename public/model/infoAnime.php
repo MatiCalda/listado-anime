@@ -85,7 +85,7 @@ class InfoAnime
     public function renderItem()
     {
         $html = "
-        <tr role=\"button\" class=\"trigger-modal\"  data-bs-id=". $this->id ." data-bs-nombreAnime=\"". $this->nombre ."\">
+        <tr role=\"button\" class=\"trigger-modal\"  data-bs-id=". $this->id ." data-bs-nombreAnime=\"". $this->nombre ."\" data-bs-tipoAnime=\"". $this->tipo ."\">
           <td class=\"align-middle text-nowrap\">" . $this->nombre . "</td>
           <td class=\"align-middle\">" . $this->tipo . "</td>
           <td class=\"align-middle text-nowrap\">" . //nl2br($this->temporadas) 

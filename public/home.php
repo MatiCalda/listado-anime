@@ -126,106 +126,199 @@ try {
 
   <!-- MODAL EDITOR -->
   <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel"></h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body container" id="datosAnime">
+                    <div class="row anime">
+                        <input type="hidden" value=0>
+                        <p class="fs-2">Anime</p>
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-6">
+                            <label for="nombreTemporada">Nombre</label>
+                            <input type="text" class="form-control inputAnime" id="nombreAnime" disabled>
+                        </div>
+                        <div class="col-7 col-sm-8 col-md-4 col-lg-4">
+                            <label for="">Tipo</label>
+                            <select class="form-select inputAnime" aria-label="Default select example" id="tipoAnime"
+                                disabled>
+                                <option value="Serie">Serie</option>
+                                <option value="Pelicula">Pelicula</option>
+                                <option value="OVA">OVA</option>
+                            </select>
+                        </div>
+                        <div class="col d-inline-flex align-items-end justify-content-around">
+                            <button type="button" class="btn btn-light btn-edit"><i
+                                    class="i-edit bi bi-pencil-square"></i></i></button>
+                            <button type="button" class="btn btn-info btn-reload"><i
+                                    class="i-reload bi bi-arrow-counterclockwise"></i></button>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                    </div>
+                </div>
+                <div class="modal-body container" id="selected-anime">
+                </div>
+                <div class="modal-footer d-flex  justify-content-between">
+                    <div>
+                        <button type="button" class="btn btn-danger" id="btnDeleteAll">Eliminar Anime</button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-success" id="btnGuardar">Guardar</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="modal-body container" id="selected-anime">
-
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-success" id="btnGuardar">Guardar</button>
-        </div>
-      </div>
     </div>
-  </div>
-  <!-- MODAL MESSAGE -->
-  <div class="modal fade" id="modalMessage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Informacion</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- MODAL MESSAGE -->
+    <div class="modal fade" id="modalMessage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-l">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Informacion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="msgResponse">
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:void(0);" class="btn btn-success" id="btnReload">Aceptar</a>
+                </div>
+            </div>
         </div>
-        <div class="modal-body" id="msgResponse">
-        </div>
-        <div class="modal-footer">
-          <a href="javascript:void(0);" class="btn btn-success" id="btnReload">Aceptar</a>
-        </div>
-      </div>
     </div>
-  </div>
-  <script>
-    const btnGuardar = document.getElementById("btnGuardar")
-    btnGuardar.addEventListener('click', () => {
-      const objAction = {
-        modificar: [],
-        eliminar: []
-      }
-      modal.querySelectorAll('.row').forEach(row => {
-        action = parseInt(row.querySelector('input[type=hidden]').value);
-        id = row.getAttribute('data-bs-id')
-        temp = {}
+    <!-- MODAL CONFIRM DELETE -->
+    <div class="modal fade" id="modalConfirm" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Atencion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Vas a eliminar el anime: </p>
+                    <p><b class="nombre"></b></p>
+                    <p>Estas de acuerdo?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="btnConfirnDelete">Si,
+                        Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const btnDeleteAll = document.getElementById('btnDeleteAll')
+        btnDeleteAll.addEventListener('click', () => {
+            let id = document.getElementById('datosAnime').querySelector('.row.anime').getAttribute('data-bs-id')
+            let nombre = document.getElementById('nombreAnime').value
+            let modalConfirm = new bootstrap.Modal(document.getElementById('modalConfirm'));
+            document.getElementById('modalConfirm').setAttribute('data-bs-id', id)
+            document.getElementById('modalConfirm').querySelector('.nombre').textContent = nombre
+            modalConfirm.show()
+        })
+        const btnGuardar = document.getElementById("btnGuardar")
+        btnGuardar.addEventListener('click', () => {
+            const objAction = {
+                anime: {
+                    modificar: false
+                },
+                temporadas: {
+                    modificar: [],
+                    eliminar: []
+                }
+            }
 
-        switch (action) {
-          case 1:
-            temp['id'] = id
-            temp['nombre'] = row.querySelector('.name').value
-            temp['cantidadCapitulos'] = row.querySelector('.cantcap').value
-            temp['duracionCapitulo'] = row.querySelector('.durcap').value
-            objAction.modificar.push(temp)
-            break;
-          case 2:
-            objAction.eliminar.push(id)
-            break;
+            //modal lo toma como id, como tengo un modal con el id=modal, lo reconoce
+            const rowAnime = modal.querySelector('.row.anime')
+            let action = parseInt(rowAnime.querySelector('input[type=hidden]').value);
+            switch (action) {
+                case 1:
+                    objAction.anime.id = rowAnime.getAttribute('data-bs-id')
+                    objAction.anime.nombre = rowAnime.querySelector('#nombreAnime').value
+                    objAction.anime.tipo = rowAnime.querySelector('#tipoAnime').value.charAt(0) 
+// los values tienen que ser una sola letra, lo pongo asi porque lo modifico para mayor compresion desde la base de datos, 
+// como agregue una nueva funcionalidad, me choca y tengo que hacer algo de este estilo
+                    objAction.anime.modificar = true
+                    break;
+                default:
+                    break;
+            }
 
-          default:
-            break;
-        }
+            modal.querySelectorAll('.row.temp').forEach(row => {
+                let action = parseInt(row.querySelector('input[type=hidden]').value);
+                let id = row.getAttribute('data-bs-id')
+                temp = {}
 
-      })
-      postAnime(objAction).then(data => {
-        document.getElementById('msgResponse').innerText = data.message
-        if (data.status == 'success') {
-          document.getElementById('btnReload').setAttribute('href', 'controller/homeController.php')
-        }
-        let modalMsg = new bootstrap.Modal(document.getElementById('modalMessage'));
-        myModal.hide();
-        modalMsg.show();
-      });
+                switch (action) {
+                    case 1:
+                        temp['id'] = id
+                        temp['nombre'] = row.querySelector('.name').value
+                        temp['cantidadCapitulos'] = row.querySelector('.cantcap').value
+                        temp['duracionCapitulo'] = row.querySelector('.durcap').value
+                        objAction.temporadas.modificar.push(temp)
+                        break;
+                    case 2:
+                        objAction.temporadas.eliminar.push(id)
+                        break;
 
-    })
-  </script>
-  <!-- Optional JavaScript; choose one of the two! -->
+                    default:
+                        break;
+                }
 
-  <!-- Option 1: Bootstrap Bundle with Popper -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-    crossorigin="anonymous"></script>
-  <script>
-    var myModal = new bootstrap.Modal(document.getElementById('modal'))
-    document.querySelectorAll('.trigger-modal').forEach(anime => {
-      anime.addEventListener('click', () => {
-        var nombreAnime = anime.getAttribute('data-bs-nombreAnime')
-        var idAnime = anime.getAttribute('data-bs-id')
-        document.getElementById('modal').setAttribute('data-bs-nombreAnime', nombreAnime)
-        document.getElementById('modal').setAttribute('data-bs-idAnime', idAnime)
-        modal = document.getElementById('selected-anime')
-        modal.innerHTML = "";
 
-        getAnime(idAnime).then(data => {
-          data.temporadas.forEach(temp => {
-            modal.innerHTML += `
-                    <div class="row" data-bs-id="${temp['id']}">
+            })
+            //console.log(JSON.stringify(objAction));
+
+            postAnime(objAction).then(data => {
+                document.getElementById('msgResponse').innerText = data.message
+                if (data.status == 'success') {
+                    document.getElementById('btnReload').setAttribute('href', 'controller/homeController.php')
+                }else{
+                  document.getElementById('btnReload').addEventListener('click', () => {
+                    modalMsg.hide();
+                    })
+                  }
+                  myModal.hide();
+                  modalMsg.show();
+               // console.log(data.message);
+            });
+        })
+    </script>
+
+
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+    <script>
+        var myModal = new bootstrap.Modal(document.getElementById('modal'))
+        var modalMsg = new bootstrap.Modal(document.getElementById('modalMessage'));
+        var confirmModal = new bootstrap.Modal(document.getElementById('modalConfirm'))
+        document.querySelectorAll('.trigger-modal').forEach(anime => {
+            anime.addEventListener('click', () => {
+                var nombreAnime = anime.getAttribute('data-bs-nombreAnime')
+                var idAnime = anime.getAttribute('data-bs-id')
+                var tipoAnime = anime.getAttribute('data-bs-tipoAnime')
+                document.getElementById('modal').setAttribute('data-bs-nombreAnime', nombreAnime)
+                document.getElementById('modal').setAttribute('data-bs-idAnime', idAnime)
+                document.getElementById('modal').setAttribute('data-bs-tipoAnime', tipoAnime)
+                let modal = document.getElementById('selected-anime')
+                modal.innerHTML = "<p class=\"fs-5\">Temporadas</p>";
+
+                getAnime(idAnime).then(data => {
+                    data.temporadas.forEach(temp => {
+                        modal.innerHTML += `
+                    <div class="row temp" data-bs-id="${temp['id']}">
                         <input type="hidden" value=0>
                         <div class="col-12 col-sm-12 col-md-12 col-lg-6">
                             <label for="nombreTemporada">Nombre</label>
                             <input type="text" class="form-control name" value="${temp['nombre']}" disabled>
                         </div>
-                        <div class="col-4 col-sm-4 col-md-4 col-lg-2">
+                        <div class="col-3 col-sm-4 col-md-4 col-lg-2">
                             <label for="">Capitulos</label>
                             <input type="number" class="form-control cantcap" value=${temp['cantidadCapitulos']} disabled>
                         </div>
@@ -241,149 +334,225 @@ try {
                         <div class="dropdown-divider"></div>
                     </div>
                     `
-          });
-          myModal.show()
+                    });
+                    myModal.show()
+                })
+            })
         })
-      })
-    })
+        var modalAnime = document.getElementById('modal')
+        modalAnime.addEventListener('show.bs.modal', function (event) {
 
+            var modal = this
+            var nombreAnime = modal.getAttribute('data-bs-nombreAnime')
+            var tipoAnime = modal.getAttribute('data-bs-tipoAnime')
+            var idAnime = modal.getAttribute('data-bs-idAnime')
 
+            modal.querySelector('#nombreAnime').value = nombreAnime
+            modal.querySelector('#tipoAnime').value = tipoAnime
 
+            tempsOriginal = {
+                'anime': {
+                    id: idAnime,
+                    nombre: nombreAnime,
+                    tipo: tipoAnime,
+                },
+                'temporadas': []
+            };
+            const inputAnime = modal.querySelector('.row.anime')
+            inputAnime.setAttribute('data-bs-id', idAnime)
+            let iconEdit = inputAnime.querySelector('.i-edit')
+            inputNombre = inputAnime.querySelector('#nombreAnime')
+            selectorTipo = inputAnime.querySelector('#tipoAnime')
 
-    var exampleModal = document.getElementById('modal')
-    exampleModal.addEventListener('show.bs.modal', function (event) {
+            inputAnime.addEventListener('change', () => {
+                inputNombre.classList.add('bg-warning')
+                selectorTipo.classList.add('bg-warning')
+            })
+            let inputAccion = inputAnime.querySelector('input[type=hidden]')
+            inputAnime.querySelector('.btn-edit').addEventListener('click', () => {
+                inputAccion.value = 1
+                inputNombre.disabled = !inputNombre.disabled
+                selectorTipo.disabled = !selectorTipo.disabled
+                if (!inputNombre.disabled) {
+                    iconEdit.classList.remove('bi-pencil-square')
+                    iconEdit.classList.add('bi-check-circle')
+                } else {
+                    iconEdit.classList.remove('bi-check-circle')
+                    iconEdit.classList.add('bi-pencil-square')
+                }
+            })
+            inputAnime.querySelector('.btn-reload').addEventListener('click', () => {
+                inputAccion.value = 0
 
+                inputNombre.disabled = selectorTipo.disabled = true
+                inputNombre.value = tempsOriginal.anime.nombre
+                selectorTipo.value = tempsOriginal.anime.tipo
 
-      // Button that triggered the modal
-      // Extract info from data-bs-* attributes
-      var modal = this
-      var nombreAnime = modal.getAttribute('data-bs-nombreAnime')
-      var idAnime = modal.getAttribute('data-bs-idAnime')
+                iconEdit.classList.remove('bi-check-circle')
+                iconEdit.classList.add('bi-pencil-square')
+                inputAnime.querySelector('.btn-edit').classList.remove('visually-hidden')
+                inputAnime.querySelectorAll('.inputAnime').forEach(field => {
+                    field.disabled = true
+                    field.classList.remove("text-decoration-line-through")
+                    field.classList.remove("bg-warning")
+                })
+            })
 
+            modal.querySelectorAll('.row.temp').forEach(input => {
+                tempsOriginal.temporadas.push({
+                    id: input.getAttribute('data-bs-id'),
+                    nombre: input.querySelector('.name').value,
+                    cantidadCapitulos: input.querySelector('.cantcap').value,
+                    duracionCapitulo: input.querySelector('.durcap').value,
+                });
+                input.addEventListener('change', () => {
+                    input.querySelectorAll('input').forEach(field => {
+                        field.classList.add('bg-warning')
 
-      // If necessary, you could initiate an AJAX request here
-      // and then do the updating in a callback.
-      //
-      // Update the modal's content.
-      var modalTitle = exampleModal.querySelector('.modal-title')
+                    })
+                })
+                let inputAccion = input.querySelector('input[type=hidden]')
+                let iconEdit = input.querySelector('.i-edit')
 
-      //modalTitle.textContent = 'Temporadas ' + nombreAnime
-      modalTitle.innerHTML = '<b>Temporadas </b>' + nombreAnime
-      tempsOriginal = {
-        'idAnime': idAnime,
-        'temporadas': []
-      };
-      modal.querySelectorAll('.row').forEach(input => {
-        tempsOriginal.temporadas.push({
-          id: input.getAttribute('data-bs-id'),
-          nombre: input.querySelector('.name').value,
-          cantidadCapitulos: input.querySelector('.cantcap').value,
-          duracionCapitulo: input.querySelector('.durcap').value,
-        });
-        input.addEventListener('change', () => {
-          input.querySelectorAll('input').forEach(field => {
-            field.classList.add('bg-warning')
-
-          })
+                const btnEdit = input.querySelector('.btn-edit')
+                btnEdit.addEventListener('click', () => {
+                    inputAccion.value = 1
+                    input.querySelectorAll('input').forEach(field => {
+                        field.disabled = !field.disabled;
+                        if (!field.disabled) {
+                            iconEdit.classList.remove('bi-pencil-square')
+                            iconEdit.classList.add('bi-check-circle')
+                        } else {
+                            iconEdit.classList.remove('bi-check-circle')
+                            iconEdit.classList.add('bi-pencil-square')
+                        }
+                    });
+                })
+                const btnDelete = input.querySelector('.btn-delete')
+                btnDelete.addEventListener('click', () => {
+                    inputAccion.value = 2
+                    const temp = tempsOriginal.temporadas.find(temporada => temporada.id === input.getAttribute('data-bs-id'));
+                    input.querySelector('.name').value = temp.nombre
+                    input.querySelector('.cantcap').value = temp.cantidadCapitulos
+                    input.querySelector('.durcap').value = temp.duracionCapitulo
+                    input.querySelectorAll('input').forEach(field => {
+                        field.disabled = true
+                        iconEdit.classList.remove('bi-check-circle')
+                        iconEdit.classList.add('bi-pencil-square')
+                        btnEdit.classList.add('visually-hidden')
+                        field.classList.add("text-decoration-line-through")
+                        field.classList.remove("bg-warning")
+                    })
+                })
+                const btnReload = input.querySelector('.btn-reload')
+                btnReload.addEventListener('click', () => {
+                    inputAccion.value = 0
+                    const temp = tempsOriginal.temporadas.find(temporada => temporada.id === input.getAttribute('data-bs-id'));
+                    input.querySelector('.name').value = temp.nombre
+                    input.querySelector('.cantcap').value = temp.cantidadCapitulos
+                    input.querySelector('.durcap').value = temp.duracionCapitulo
+                    iconEdit.classList.remove('bi-check-circle')
+                    iconEdit.classList.add('bi-pencil-square')
+                    btnEdit.classList.remove('visually-hidden')
+                    input.querySelectorAll('input').forEach(field => {
+                        field.disabled = true
+                        field.classList.remove("text-decoration-line-through")
+                        field.classList.remove("bg-warning")
+                    })
+                })
+            });
         })
-      });
+        modalAnime.addEventListener('hide.bs.modal', function (event) {
+            var modal = this
+            //reseteo los datos del modal
+            modal.querySelector('#datosAnime').innerHTML = `
+            <div class="row anime">
+                <input type="hidden" value=0>
+                <p class="fs-2">Anime</p>
+                <div class="col-12 col-sm-12 col-md-12 col-lg-6">
+                    <label for="nombreTemporada">Nombre</label>
+                    <input type="text" class="form-control inputAnime" id="nombreAnime" disabled>
+                </div>
+                <div class="col-7 col-sm-8 col-md-4 col-lg-4">
+                    <label for="">Tipo</label>
+                    <select class="form-select inputAnime" aria-label="Default select example" id="tipoAnime"
+                        disabled>
+                        <option value="Serie">Serie</option>
+                        <option value="Pelicula">Pelicula</option>
+                        <option value="OVA">OVA</option>
+                    </select>
+                </div>
+                <div class="col d-inline-flex align-items-end justify-content-around">
+                    <button type="button" class="btn btn-light btn-edit"><i
+                            class="i-edit bi bi-pencil-square"></i></i></button>
+                    <button type="button" class="btn btn-info btn-reload"><i
+                            class="i-reload bi bi-arrow-counterclockwise"></i></button>
+                </div>
+                <div class="dropdown-divider"></div>
+            </div>
+            `
 
-      document.querySelectorAll('.btn-edit').forEach(btn => {
-        btn.addEventListener('click', () => {
-          item = btn.parentElement.parentElement;
-          iconEdit = item.querySelector('.i-edit')
-          item.querySelector('input[type=hidden]').value = 1
-          item.querySelectorAll('input').forEach(input => {
-            input.disabled = !input.disabled;
-            if (!input.disabled) {
-              iconEdit.classList.remove('bi-pencil-square')
-              iconEdit.classList.add('bi-check-circle')
-            } else {
-              iconEdit.classList.remove('bi-check-circle')
-              iconEdit.classList.add('bi-pencil-square')
+        })
+        var modalConfirmar = document.getElementById('modalConfirm');
+        modalConfirmar.addEventListener('show.bs.modal', function (event) {
+            let modalConfirm = this
+            let idAnime = modalConfirm.getAttribute('data-bs-id')
+            modalConfirm.querySelector('#btnConfirnDelete').addEventListener('click', () => {
+                deleteAnime(idAnime).then(data => {
+                    document.getElementById('msgResponse').innerText = data.message
+                    if (data.status == 'success') {
+                        document.getElementById('btnReload').setAttribute('href', 'controller/homeController.php')
+                    }
+                });
+                myModal.hide();
+                modalMsg.show();
+
+            })
+        })
+
+
+        async function getAnime(idAnime) {
+            let respuesta;
+
+            const response = await fetch(`controller/infoAnimeController.php?idAnime=${encodeURI(idAnime)}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await response.json();
+            respuesta = data;
+            return respuesta;
+        }
+        async function postAnime(animeData) {
+            const response = await fetch('controller/infoAnimeController.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(animeData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Error en la solicitud: ' + response.status);
             }
-          });
-        })
-      })
-      document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', () => {
-          item = btn.parentElement.parentElement;
-          item.querySelector('input[type=hidden]').value = 2
-          const temp = tempsOriginal.temporadas.find(temporada => temporada.id === item.getAttribute('data-bs-id'));
-          item.querySelector('.name').value = temp.nombre
-          item.querySelector('.cantcap').value = temp.cantidadCapitulos
-          item.querySelector('.durcap').value = temp.duracionCapitulo
 
-          iconDelete = item.querySelector('.i-delete')
-          item.querySelectorAll('input').forEach(input => {
-            input.disabled = true
-            iconEdit = item.querySelector('.i-edit')
-            iconEdit.classList.remove('bi-check-circle')
-            iconEdit.classList.add('bi-pencil-square')
-            btnEdit = item.querySelector('.btn-edit')
-            btnEdit.classList.add('visually-hidden')
-            input.classList.add("text-decoration-line-through")
-            input.classList.remove("bg-warning")
-          })
+            const data = await response.json();
+            return data;
+        }
+        async function deleteAnime(idAnime) {
+            let respuesta;
 
-        })
-      })
-      document.querySelectorAll('.btn-reload').forEach(btn => {
-        btn.addEventListener('click', () => {
-          item = btn.parentElement.parentElement;
-          item.querySelector('input[type=hidden]').value = 0
-          const temp = tempsOriginal.temporadas.find(temporada => temporada.id === item.getAttribute('data-bs-id'));
-          item.querySelector('.name').value = temp.nombre
-          item.querySelector('.cantcap').value = temp.cantidadCapitulos
-          item.querySelector('.durcap').value = temp.duracionCapitulo
+            const response = await fetch(`controller/infoAnimeController.php?idAnime=${encodeURI(idAnime)}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            });
 
-          iconEdit = item.querySelector('.i-edit')
-          iconEdit.classList.remove('bi-check-circle')
-          iconEdit.classList.add('bi-pencil-square')
-          btnEdit = item.querySelector('.btn-edit')
-          btnEdit.classList.remove('visually-hidden')
-          item.querySelectorAll('input').forEach(input => {
-            input.disabled = true
-            input.classList.remove("text-decoration-line-through")
-            input.classList.remove("bg-warning")
-          })
-        })
-      })
-    })
-    async function getAnime(idAnime) {
-      let resupuesta;
-
-      const response = await fetch(`controller/infoAnimeController.php?idAnime=${encodeURI(idAnime)}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      const data = await response.json();
-      resupuesta = data;
-      return resupuesta;
-    }
-    async function postAnime(animeData) {
-      const response = await fetch('controller/infoAnimeController.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(animeData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Error en la solicitud: ' + response.status);
-      }
-
-      const data = await response.json();
-      return data;
-    }
-  </script>
-  <!-- Option 2: Separate Popper and Bootstrap JS -->
-  <!--
-      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
-      -->
+            const data = await response.json();
+            respuesta = data;
+            return respuesta;
+        }
+    </script>
+  
 </body>
 
 </html>
