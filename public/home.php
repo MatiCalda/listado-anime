@@ -195,7 +195,6 @@ try {
         let modalMsg = new bootstrap.Modal(document.getElementById('modalMessage'));
         myModal.hide();
         modalMsg.show();
-        console.log(data.message);
       });
 
     })
