@@ -20,6 +20,14 @@ if (isset($_SESSION['user'])) {
 
 <head>
     <!-- Required meta tags -->
+    <?php
+    if (isset($_GET['external']) && $_GET['external'] == "true") {
+        ?>
+        <meta http-equiv="refresh" content="0; url=<?= $client->createAuthUrl() ?>">
+        <?php
+        exit;
+    }
+    ?>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -32,12 +40,12 @@ if (isset($_SESSION['user'])) {
 
 <body>
     <div class="d-grid gap-2 col-6 mx-auto pt-5">
-        <!-- <a  href="<?= $client->createAuthUrl() ?>" class="btn btn-success" type="button">LogIn</a> -->
-        <a href="controller/homeController.php" class="btn btn-success" type="button">LogIn</a>
+        <a href="<?= $client->createAuthUrl() ?>" class="btn btn-success" type="button">LogIn</a>
+        <!-- <a href="controller/homeController.php" class="btn btn-success" type="button">LogIn</a> -->
     </div>
 
 
-    
+
     <!-- Optional JavaScript; choose one of the two! -->
 
     <!-- Option 1: Bootstrap Bundle with Popper -->
